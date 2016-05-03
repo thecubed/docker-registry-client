@@ -20,6 +20,18 @@ func (registry *Registry) DownloadLayer(repository string, digest digest.Digest)
 	return resp.Body, nil
 }
 
+func (registry *Registry) DownloadLayerLength(repository string, digest digest.Digest) (io.ReadCloser, int64, error) {
+	url := registry.url("/v2/%s/blobs/%s", repository, digest)
+	registry.Logf("registry.layer.download url=%s repository=%s digest=%s", url, repository, digest)
+
+	resp, err := registry.Client.Get(url)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return resp.Body, resp.ContentLength, nil
+}
+
 func (registry *Registry) UploadLayer(repository string, digest digest.Digest, content io.Reader) error {
 	uploadUrl, err := registry.initiateUpload(repository)
 	if err != nil {
